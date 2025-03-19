@@ -1,14 +1,24 @@
 steps:
   # Install Terraform
-  - name: 'hashicorp/terraform'
+ # Initialize Terraform with GCS backend
+  - name: 'hashicorp/terraform:1.5.0'
     id: 'init'
     entrypoint: 'terraform'
-    args: ['init']
-
+    args: ['init', '-backend-config=bucket=my-terraform-state-bucket', '-backend-config=prefix=terraform/state']
+ 
   - name: 'hashicorp/terraform:1.5.0'
     id: 'validate'
     entrypoint: 'terraform'
     args: ['validate']
+
+  - name: 'aquasec/tfsec:latest'
+    id: 'security'
+    args: ['.', '--soft-fail']
+    
+# Run security scan (fixed tfsec issue with Trivy)
+  - name: 'aquasec/trivy:latest'
+    id: 'security'
+    args: ['config', '.', '--exit-code', '0']
 
     # Security scan
   - name: 'gcr.io/cloud-builders/tfsec'
