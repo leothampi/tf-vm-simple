@@ -4,9 +4,7 @@ steps:
   - name: 'hashicorp/terraform:1.5.0'
     id: 'init'
     entrypoint: 'terraform'
-    args: ['init' ]
-    
-    #'-backend-config=bucket=my-terraform-state-bucket']
+    args: ['init', '-backend-config=prefix=terraform/state', -backend-config=bucket=my-tf-simple-vm']
   
   # Validate Terraform code
   - name: 'hashicorp/terraform:1.5.0'
