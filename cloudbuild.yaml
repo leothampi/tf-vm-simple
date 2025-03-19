@@ -4,21 +4,19 @@ steps:
     id: 'init'
     entrypoint: 'terraform'
     args: ['init']
-    dir: 'tf-vm-simple'
+    
 
   # Preview changes
   - name: 'hashicorp/terraform'
     id: 'plan'
     entrypoint: 'terraform'
     args: ['plan']
-    dir: 'tf-vm-simple'
 
   # Apply changes
   - name: 'hashicorp/terraform'
     id: 'apply'
     entrypoint: 'terraform'
     args: ['apply', '-auto-approve']
-    dir: 'tf-vm-simple'
 
 options:
   logging: CLOUD_LOGGING_ONLY
