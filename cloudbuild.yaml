@@ -4,7 +4,6 @@ steps:
     id: 'init'
     entrypoint: 'terraform'
     args: ['init']
-    dir: 'tf-vm-simple'
 
   - name: 'hashicorp/terraform:1.5.0'
     id: 'validate'
@@ -28,7 +27,7 @@ steps:
     entrypoint: 'bash'
     args: ['-c', 'echo "Manual approval required for prod"']
   # Preview changes
-  
+
   # Apply changes
   - name: 'hashicorp/terraform:1.5.0'
     id: 'apply'
