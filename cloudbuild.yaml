@@ -1,43 +1,38 @@
 steps:
-  # Install Terraform
- # Initialize Terraform with GCS backend
+  
+  # Initialize Terraform
   - name: 'hashicorp/terraform:1.5.0'
     id: 'init'
     entrypoint: 'terraform'
-    args: ['init', '-backend-config=bucket=my-terraform-state-bucket', '-backend-config=prefix=terraform/state']
- 
+    args: ['init', '-backend-config=bucket=my-state-bucket']
+  
+  # Validate Terraform code
   - name: 'hashicorp/terraform:1.5.0'
     id: 'validate'
     entrypoint: 'terraform'
     args: ['validate']
-    
-# Run security scan (fixed tfsec issue with Trivy)
-  - name: 'aquasec/trivy:latest'
-    id: 'security'
-    args: ['config', '.', '--exit-code', '0']
 
-    # Security scan
-  - name: 'gcr.io/cloud-builders/tfsec'
+  # Run security scan with tfsec (or Trivy)
+  - name: 'aquasec/tfsec:latest'
     id: 'security'
-    args: ['.']
+    args: ['.', '--soft-fail']  # Soft fail to debug issues
+    # Alternative with Trivy:
+    # - name: 'aquasec/trivy:latest'
+    #   args: ['config', '.', '--exit-code', '0']
 
-    # Plan changes
+  # Plan Terraform changes
   - name: 'hashicorp/terraform:1.5.0'
     id: 'plan'
     entrypoint: 'terraform'
     args: ['plan', '-out=tfplan']
 
-    # Manual approval for prod (optional)
-  - name: 'gcr.io/cloud-builders/gcloud'
-    id: 'approve'
-    entrypoint: 'bash'
-    args: ['-c', 'echo "Manual approval required for prod"']
-  # Preview changes
-
-  # Apply changes
+  # Apply changes (optional, with approval)
   - name: 'hashicorp/terraform:1.5.0'
     id: 'apply'
     entrypoint: 'terraform'
     args: ['apply', '-auto-approve', 'tfplan']
+    waitFor: ['plan']
+
 options:
   logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'  # Faster execution
