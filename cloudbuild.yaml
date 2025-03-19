@@ -6,19 +6,33 @@ steps:
     args: ['init']
     dir: 'tf-vm-simple'
 
-  # Preview changes
-  - name: 'hashicorp/terraform'
+  - name: 'hashicorp/terraform:1.5.0'
+    id: 'validate'
+    entrypoint: 'terraform'
+    args: ['validate']
+
+    # Security scan
+  - name: 'gcr.io/cloud-builders/tfsec'
+    id: 'security'
+    args: ['.']
+
+    # Plan changes
+  - name: 'hashicorp/terraform:1.5.0'
     id: 'plan'
     entrypoint: 'terraform'
-    args: ['plan']
-    dir: 'tf-vm-simple'
+    args: ['plan', '-out=tfplan']
 
+    # Manual approval for prod (optional)
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'approve'
+    entrypoint: 'bash'
+    args: ['-c', 'echo "Manual approval required for prod"']
+  # Preview changes
+  
   # Apply changes
-  - name: 'hashicorp/terraform'
+  - name: 'hashicorp/terraform:1.5.0'
     id: 'apply'
     entrypoint: 'terraform'
-    args: ['apply', '-auto-approve']
-    dir: 'tf-vm-simple'
-
+    args: ['apply', '-auto-approve', 'tfplan']
 options:
   logging: CLOUD_LOGGING_ONLY
