@@ -3,6 +3,14 @@ provider "google" {
   region  = "us-central1"
 }
 
+resource "google_storage_bucket" "tf_state" {
+  name     = "my-tf-simple-vm"
+  location = "us-central1"
+  versioning {
+    enabled = true  # Enable versioning for state recovery
+  }
+}
+
 resource "google_compute_network" "cicd_network" {
   name                    = "cicd-network"
   auto_create_subnetworks = false
